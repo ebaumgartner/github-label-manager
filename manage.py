@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
+import colorsys
 import json
 
 import click
 from github import Github
 from github import Auth
+from jinja2 import Environment, PackageLoader, select_autoescape
 
 
 @click.group()
@@ -61,10 +63,43 @@ def download(ctx, repo, output, token):
 
 
 @cli.command()
+@click.argument("labels", type=click.File('r'))
+@click.argument("output", type=click.File('w'))
 @click.pass_context
-def preview(ctx):
-    """Create a html file to preview labels."""
-    click.echo("previewing...")
+def preview(ctx, labels, output):
+    """
+    Create an html OUTPUT file that previews a LABELS file.
+
+    LABELS is the path to a json file containing labels, or "-" for stdin.
+
+    OUTPUT is the file path for the preview html, or "-" for stdout.
+
+    """
+    def add_color_detail(label):
+        """Add distinct RGB and HSL values to the label."""
+        # rgb values range 0..255
+        r, g, b = tuple(int(label["color"][i: i + 2], 16) for i in (0, 2, 4))
+        h, l, s = colorsys.rgb_to_hls(r / 255, g / 255, b / 255)
+        label.update({
+            "r": r,
+            "g": g,
+            "b": b,
+            "h": round(h * 360),
+            "l": round(l * 100),
+            "s": round(s * 100),
+        })
+
+    env = Environment(
+        loader=PackageLoader("manage"),
+        autoescape=select_autoescape()
+    )
+    label_list = json.load(labels)
+    for label in label_list:
+        add_color_detail(label)
+
+    template = env.get_template("preview.html")
+    html = template.render(labels=label_list, filename=labels.name)
+    output.write(html)
 
 
 if __name__ == '__main__':
