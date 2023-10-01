@@ -78,7 +78,8 @@ def preview(ctx, labels, output):
     def add_color_detail(label):
         """Add distinct RGB and HSL values to the label."""
         # rgb values range 0..255
-        r, g, b = tuple(int(label["color"][i: i + 2], 16) for i in (0, 2, 4))
+        hexcolor = label["color"].lower()
+        r, g, b = tuple(int(hexcolor[i: i + 2], 16) for i in (0, 2, 4))
         h, l, s = colorsys.rgb_to_hls(r / 255, g / 255, b / 255)
         label.update({
             "r": r,
