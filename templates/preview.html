@@ -12,10 +12,10 @@ body {
 }
 
 .row {
-    border: 1px solid;
-    border-color: var(--para-border);
-    padding: 0.5em;
-    margin: 0;
+  border: 1px solid;
+  border-color: var(--para-border);
+  padding: 0.5em;
+  margin: 0;
 }
 
 .label {
@@ -84,6 +84,20 @@ body {
       --label-s: {{ label.s }};
       --label-l: {{ label.l }}'
     >{{ label.name }}</span>
+    {% if label.aliases %} / aliases include
+    {% for alias in label.aliases %}
+      <span
+        class='label'
+        style='
+        --label-r: {{ label.r }};
+        --label-g: {{ label.g }};
+        --label-b: {{ label.b }};
+        --label-h: {{ label.h }};
+        --label-s: {{ label.s }};
+        --label-l: {{ label.l }}'
+      >{{ alias }}</span>
+    {% endfor %}
+    {% endif %}
   </p>
   {% endfor %}
 </body>
